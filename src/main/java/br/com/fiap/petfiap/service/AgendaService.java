@@ -6,9 +6,8 @@ import br.com.fiap.petfiap.model.Atendimento;
 import br.com.fiap.petfiap.repository.AtendimentoRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 import java.time.LocalDateTime;
+import java.util.List;
 
 // Regras de agenda do PetFiap: agendar, concluir e cancelar atendimentos.
 @Service
@@ -22,28 +21,36 @@ public class AgendaService {
 
     // Agenda um novo atendimento: recusa horario ja ocupado pelo mesmo pet.
     public Atendimento agendar(Atendimento novo) {
-    	if (novo.getDataHora().isBefore(LocalDateTime.now())) {
-    	    throw new IllegalArgumentException(
-    	            "Nao e permitido agendar atendimento no passado"
-    	    );
-    	}
-        List<Atendimento> doPet = repository.findByPetNome(novo.getPetNome());
-        for (Atendimento a : doPet) {
-        	if (a.getPetNome().equals(novo.getPetNome())
-        	        && a.getDataHora().equals(novo.getDataHora())
-        	        && "AGENDADO".equals(a.getStatus())) {
+        if (novo.getDataHora().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException(
+                    "Nao e permitido agendar atendimento no passado"
+            );
+        }
+
+        validarHorarioDisponivel(novo);
+
+        return repository.save(novo);
+    }
+
+    private void validarHorarioDisponivel(Atendimento novo) {
+        List<Atendimento> atendimentosDoPet = repository.findByPetNome(novo.getPetNome());
+
+        for (Atendimento atendimento : atendimentosDoPet) {
+            if (atendimento.getPetNome().equals(novo.getPetNome())
+                    && atendimento.getDataHora().equals(novo.getDataHora())
+                    && "AGENDADO".equals(atendimento.getStatus())) {
                 throw new HorarioOcupadoException(
-                        "Pet " + novo.getPetNome() + " ja possui atendimento agendado nesse horario");
+                        "Pet " + novo.getPetNome()
+                                + " ja possui atendimento agendado nesse horario");
             }
         }
-        Atendimento salvo = repository.save(novo);
-        return salvo;
     }
 
     // Busca pelo id; nunca retorna null, o orElseThrow garante a excecao.
     public Atendimento buscarPorId(Long id) {
-       return repository.findById(id)
-                    .orElseThrow(() -> new AtendimentoNaoEncontradoException("Atendimento nao encontrado: " + id));
+        return repository.findById(id)
+                .orElseThrow(() -> new AtendimentoNaoEncontradoException(
+                        "Atendimento nao encontrado: " + id));
     }
 
     // Conclui o atendimento (status AGENDADO -> CONCLUIDO).

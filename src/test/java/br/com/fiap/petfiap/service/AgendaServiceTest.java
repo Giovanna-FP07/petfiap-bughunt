@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 // Teste unitario da agenda: NAO sobe o Spring e NAO conecta no Oracle (Aula 15).
@@ -36,7 +37,13 @@ public class AgendaServiceTest {
     private AgendaService service;
 
     private Banho banhoDoRexAmanha10h() {
-        return new Banho(1, "Rex", "PEQUENO", "Ana", LocalDateTime.now().plusDays(1).withNano(0));
+        return new Banho(
+                1,
+                "Rex",
+                "PEQUENO",
+                "Ana",
+                LocalDateTime.now().plusDays(1).withNano(0)
+        );
     }
 
     @Test
@@ -63,13 +70,24 @@ public class AgendaServiceTest {
 
         // A MESMA data/hora em outro objeto: e o que acontece no mundo real,
         // quando duas requisicoes diferentes trazem valores iguais
-        LocalDateTime mesmoHorarioEmOutroObjeto = LocalDateTime.parse(existente.getDataHora().toString());
-        Banho novaTentativa = new Banho(2, "Rex", "PEQUENO", "Ana", mesmoHorarioEmOutroObjeto);
+        LocalDateTime mesmoHorarioEmOutroObjeto =
+                LocalDateTime.parse(existente.getDataHora().toString());
+
+        Banho novaTentativa = new Banho(
+                2,
+                "Rex",
+                "PEQUENO",
+                "Ana",
+                mesmoHorarioEmOutroObjeto
+        );
 
         // Act + Assert
-        assertThrows(HorarioOcupadoException.class, () -> service.agendar(novaTentativa));
+        assertThrows(
+                HorarioOcupadoException.class,
+                () -> service.agendar(novaTentativa)
+        );
 
-        // O banco NUNCA e acionado com o conflito detectado
+        // O conflito impede que um novo atendimento seja salvo
         verify(repository, never()).save(any());
     }
 
@@ -95,8 +113,11 @@ public class AgendaServiceTest {
         jaConcluido.setStatus("CONCLUIDO");
         when(repository.findById(1L)).thenReturn(Optional.of(jaConcluido));
 
-        // Act + Assert: a excecao ESPERADA
-        assertThrows(StatusInvalidoException.class, () -> service.concluir(1L));
+        // Act + Assert
+        assertThrows(
+                StatusInvalidoException.class,
+                () -> service.concluir(1L)
+        );
 
         // Nada e salvo quando a operacao e recusada
         verify(repository, never()).save(any());
@@ -108,9 +129,12 @@ public class AgendaServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
         // Act + Assert
-        assertThrows(AtendimentoNaoEncontradoException.class, () -> service.buscarPorId(99L));
+        assertThrows(
+                AtendimentoNaoEncontradoException.class,
+                () -> service.buscarPorId(99L)
+        );
     }
-    
+
     @Test
     public void deveCancelarAtendimentoAgendado() {
         // Arrange
@@ -125,7 +149,7 @@ public class AgendaServiceTest {
         assertEquals("CANCELADO", cancelado.getStatus());
         verify(repository).save(agendado);
     }
-    
+
     @Test
     public void deveRecusarCancelamentoDeAtendimentoJaCancelado() {
         // Arrange
@@ -134,12 +158,15 @@ public class AgendaServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(jaCancelado));
 
         // Act + Assert
-        assertThrows(StatusInvalidoException.class, () -> service.cancelar(1L));
+        assertThrows(
+                StatusInvalidoException.class,
+                () -> service.cancelar(1L)
+        );
 
         // Nada deve ser salvo quando a operacao e recusada
         verify(repository, never()).save(any());
     }
-    
+
     @Test
     public void deveRecusarAgendamentoNoPassado() {
         // Arrange
@@ -157,7 +184,7 @@ public class AgendaServiceTest {
                 () -> service.agendar(banhoNoPassado)
         );
 
-        // Um atendimento no passado nunca deve ser salvo
-        verify(repository, never()).save(any());
+        // Um atendimento no passado nao deve consultar nem alterar o repository
+        verifyNoInteractions(repository);
     }
 }

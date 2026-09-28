@@ -153,4 +153,25 @@ public class AgendaServiceTest {
         // Nada deve ser salvo quando a operacao e recusada
         verify(repository, never()).save(any());
     }
+    
+    @Test
+    public void deveRecusarAgendamentoNoPassado() {
+        // Arrange
+        Banho banhoNoPassado = new Banho(
+                1,
+                "Rex",
+                "PEQUENO",
+                "Ana",
+                LocalDateTime.now().minusDays(1)
+        );
+
+        // Act + Assert
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> service.agendar(banhoNoPassado)
+        );
+
+        // Um atendimento no passado nunca deve ser salvo
+        verify(repository, never()).save(any());
+    }
 }

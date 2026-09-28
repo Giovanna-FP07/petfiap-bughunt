@@ -4,7 +4,6 @@ import br.com.fiap.petfiap.exception.AtendimentoNaoEncontradoException;
 import br.com.fiap.petfiap.exception.HorarioOcupadoException;
 import br.com.fiap.petfiap.model.Atendimento;
 import br.com.fiap.petfiap.repository.AtendimentoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +14,11 @@ import java.time.LocalDateTime;
 @Service
 public class AgendaService {
 
-    @Autowired
-    private AtendimentoRepository repository;
+    private final AtendimentoRepository repository;
+
+    public AgendaService(AtendimentoRepository repository) {
+        this.repository = repository;
+    }
 
     // Agenda um novo atendimento: recusa horario ja ocupado pelo mesmo pet.
     public Atendimento agendar(Atendimento novo) {

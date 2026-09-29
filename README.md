@@ -55,7 +55,7 @@
 | teste02 | `BanhoTest.deveCustar60ReaisParaPortePequeno()` | O Banho de pet `PEQUENO` deve custar R$ 60,00. | **Vermelho.** Revelou o preço incorreto do Banho para porte pequeno. |
 | teste03 | `ConsultaVeterinariaTest.deveCustar150Reais()` | A Consulta Veterinária possui preço fixo de R$ 150,00, independentemente do porte. | **Verde de cara.** A regra já estava implementada corretamente. |
 | teste04 | `AgendaServiceTest.deveCancelarAtendimentoAgendado()` | Um atendimento `AGENDADO` pode ser cancelado e deve passar para `CANCELADO`. | **Verde de cara.** O caminho válido de cancelamento já funcionava. |
-| teste05 | `AgendaServiceTest.deveRecusarCancelamentoDeAtendimentoJaCancelado()` | Um atendimento que já está `CANCELADO` não pode ser cancelado novamente. | **Vermelho.** Revelou que o método `cancelar()` não validava corretamente o status. |
+| teste05 | `AgendaServiceTest.deveRecusarCancelamentoDeAtendimentoConcluido()` | Um atendimento `CONCLUIDO` não pode ser cancelado, pois o atendimento já foi realizado. | **Vermelho.** Revelou que o método `cancelar()` não validava corretamente o status antes de permitir o cancelamento. |
 | teste06 | `AgendaServiceTest.deveRecusarAgendamentoNoPassado()` | Um atendimento não pode ser agendado no passado e o repository não deve ser consultado nessa situação. | **Vermelho.** Revelou a ausência da validação de data antes do acesso ao repository. |
 
 ---

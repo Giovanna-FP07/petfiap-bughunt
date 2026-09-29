@@ -151,11 +151,11 @@ public class AgendaServiceTest {
     }
 
     @Test
-    public void deveRecusarCancelamentoDeAtendimentoJaCancelado() {
+    public void deveRecusarCancelamentoDeAtendimentoConcluido() {
         // Arrange
-        Banho jaCancelado = banhoDoRexAmanha10h();
-        jaCancelado.setStatus("CANCELADO");
-        when(repository.findById(1L)).thenReturn(Optional.of(jaCancelado));
+        Banho concluido = banhoDoRexAmanha10h();
+        concluido.setStatus("CONCLUIDO");
+        when(repository.findById(1L)).thenReturn(Optional.of(concluido));
 
         // Act + Assert
         assertThrows(
@@ -166,7 +166,7 @@ public class AgendaServiceTest {
         // Nada deve ser salvo quando a operacao e recusada
         verify(repository, never()).save(any());
     }
-
+    
     @Test
     public void deveRecusarAgendamentoNoPassado() {
         // Arrange
